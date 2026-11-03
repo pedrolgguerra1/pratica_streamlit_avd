@@ -1,6 +1,6 @@
 # EDA e dashboards Streamlit — saúde de baterias de VEs
 
-**Aplicação online:** *(URL do Streamlit Cloud a preencher após o deploy)*
+**Aplicação online:** *(URL do Streamlit Cloud)[https://pedroguerra.streamlit.app/]*
 
 Dashboard interativo da análise exploratória de dados (EDA) sobre o conjunto [EV Battery Health Prediction Dataset (20k)](https://www.kaggle.com/datasets/srisyra02/ev-battery-health-prediction-dataset-20k).
 
