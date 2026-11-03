@@ -1,13 +1,11 @@
-
-import glob
 import logging
-import os
 
-import kagglehub
 import numpy as np
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+
+from src.data_loader import load_data
 
 logger = logging.getLogger(__name__)
 
@@ -26,21 +24,15 @@ ORDEM_ESTADO = {"estado_bateria": ["Saudável", "Degradada"]}
 LIMITE_SOH = 80.0
 MAX_HISTOGRAMAS = 12
 
-KAGGLE_DATASET = "srisyra02/ev-battery-health-prediction-dataset-20k"
 COLS_SENSIVEIS = ["vehicle_id", "battery_serial"]
 
 
-@st.cache_data(show_spinner="A descarregar e a preparar o dataset do Kaggle...")
-def carregar_dados() -> pd.DataFrame:
-    path = kagglehub.dataset_download(KAGGLE_DATASET)
-    csv_files = glob.glob(os.path.join(path, "*.csv"))
-    if not csv_files:
-        raise FileNotFoundError("Nenhum CSV encontrado no dataset descarregado.")
-
-    df = pd.read_csv(csv_files[0])
+def preparar_dados() -> pd.DataFrame:
+    """Usa o load_data() de src/data_loader.py e prepara o dataframe do app."""
+    df = load_data()
 
     # Alvo derivado do SoH (limiar de fim de vida útil = 80%), como no notebook.
-    soh_col = next((c for c in ("state_of_health", "battery_health_percent") if c in df.columns), None)
+    soh_col = next((c for c in ("battery_health_percent", "state_of_health") if c in df.columns), None)
     if soh_col is not None:
         df["estado_bateria"] = np.where(df[soh_col] < LIMITE_SOH, "Degradada", "Saudável")
         df.loc[df[soh_col].isna(), "estado_bateria"] = np.nan
@@ -54,7 +46,7 @@ def carregar_dados() -> pd.DataFrame:
 
 
 try:
-    df_raw = carregar_dados()
+    df_raw = preparar_dados()
 except Exception: 
     logger.exception("Falha ao carregar o dataset")
     st.error("Não foi possível carregar os dados neste momento. Tente novamente em instantes.")
