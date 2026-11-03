@@ -1,8 +1,4 @@
-"""Plataforma de Telemetria e Saúde de Baterias de VEs (Streamlit).
 
-Dashboard 1: laboratório de distribuição e correlação.
-Dashboard 2: KPIs e gestão de frota (público-alvo: gestores de frota e engenharia de BMS).
-"""
 import glob
 import logging
 import os
@@ -31,7 +27,6 @@ LIMITE_SOH = 80.0
 MAX_HISTOGRAMAS = 12
 
 KAGGLE_DATASET = "srisyra02/ev-battery-health-prediction-dataset-20k"
-# Identificadores que nunca devem chegar à interface (privacidade).
 COLS_SENSIVEIS = ["vehicle_id", "battery_serial"]
 
 
@@ -60,7 +55,7 @@ def carregar_dados() -> pd.DataFrame:
 
 try:
     df_raw = carregar_dados()
-except Exception:  # não expõe traceback/caminhos ao público
+except Exception: 
     logger.exception("Falha ao carregar o dataset")
     st.error("Não foi possível carregar os dados neste momento. Tente novamente em instantes.")
     st.stop()
@@ -97,7 +92,6 @@ intervalo = st.sidebar.slider(
     help="Valores fora do intervalo são excluídos da avaliação (útil para tirar extremos).",
 )
 
-# Linhas sem medição da variável de filtro (NaN) são mantidas: o slider só exclui valores.
 mascara = serie_filtro.between(*intervalo) | serie_filtro.isna()
 df_filtrado = df_raw[mascara]
 
@@ -132,7 +126,6 @@ with tab1:
             st.markdown("#### Mapa de Calor de Correlação")
             metodo = st.radio("Método:", ["pearson", "spearman"], horizontal=True, index=1)
             corr = df_filtrado[vars_selecionadas].corr(method=metodo)
-            # Triângulo inferior sem a diagonal: remove a 1.ª linha e a última coluna vazias.
             tri = corr.where(np.tril(np.ones(corr.shape, dtype=bool), k=-1)).iloc[1:, :-1]
             fig_hm = px.imshow(
                 tri, text_auto=".2f", zmin=-1, zmax=1,
